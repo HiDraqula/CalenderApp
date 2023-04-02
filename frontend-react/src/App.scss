@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.box {
+  > div > div {
+    padding: 0.7rem;
+  }
+//   .weekdays {
+//     .btn {
+//       @apply flex justify-center items-center h-[3.2rem] w-[3.2rem] hover:shadow-md border rounded border-white/0 hover:border-black/10 transition duration-100 cursor-pointer;
+//     }
+//   }
+//   .months {
+//     .btn {
+//       @apply flex justify-center uppercase items-center hover:shadow-md border rounded border-white/0 hover:border-black/10 transition duration-100 cursor-pointer;
+//     }
+//   }
+}
