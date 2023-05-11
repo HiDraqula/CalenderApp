@@ -1,0 +1,17 @@
+http://localhost:3000/all
+
+###
+
+http://localhost:3000/createUid
+###
+
+POST http://localhost:3000/updateData
+content-type: application/json
+
+{
+    "uid": "f0d9e6e6-2cc1-43cf-8305-69f33c66566f",
+    "data": {"1-5-2023": ["ani", "sasas"]}
+}
+
+###
+POST http://localhost:3000/getData/f0d9e6e6-2cc1-43cf-8305-69f33c66566f

@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { getMonths, isToday } from "./lib/utils";
 import Api from "./Api";
+import { useSelector } from "react-redux";
+import { dispatch } from "./store";
+import { appActions } from "./services/appReducer";
 
 let weeks = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -25,21 +28,28 @@ export default function Calender() {
   const [weekCols, setWeekCols] = useState([]);
   const [daysCols, setDaysCols] = useState([]);
 
-  const [data, setData] = useState({
-    uid: "",
-    data: [],
-  });
+  // const [data, setData] = useState({});
+  const uid = useSelector((state) => state.app.uid);
+  const data = useSelector((state) => state.app.data);
 
   useEffect(() => {
-    initiate();
-    fetchData();
-  }, []);
+    if (uid) {
+      fetchData();
+    }
+  }, [uid]);
+  useEffect(() => {
+    if (data && Object.keys(data).length) {
+      initiate();
+    }
+  }, [data]);
 
   const fetchData = () => {
-    let uid = "cec926f6-9aef-4559-af2a-b0edc4ec826e"
-    Api.post("/calender/"+uid, { "01-02-2000": ["sasas", "sasas"] }).then(
-      ({ data }) => console.log(data)
-    );
+    // Api.post("/calender/"+uid, { "01-02-2000": ["sasas", "sasas"] }).then(
+    Api.post("/getData/" + uid).then(({ data: d }) => {
+      console.log(d);
+      // setData(d.data);
+      dispatch(appActions.setData(d.data))
+    });
   };
   const initiate = () => {
     setCalender();
@@ -110,7 +120,13 @@ export default function Calender() {
     setWeekCols(weekcols);
 
     // setDays(dayColm);
+    // console.log({ data }, selected);
     let dayscols = [...Array(dayColm)].map((_, i) => {
+      let date = `${i + 1}-${selected.month + 1}-${selected.year}`;
+      // console.log(
+      //   `${i + 1}-${selected.month + 1}-${selected.year}`,
+      //   data[date]
+      // );
       return {
         current: isToday({
           year: selected.year,
@@ -121,7 +137,10 @@ export default function Calender() {
           (i + 1 > 28 && color[i + 1]) ||
           (i + 1 > 27 && days == 28 ? color[29] : ""),
         selected: selected.date == i + 1,
-        hasData: i == 9,
+        // hasData: i == 9,
+        // hasData: data[date],
+        hasData: !!(data[date] && Object.keys(data[date]).length),
+        date,
       };
     });
     console.log({ dayscols });
@@ -185,6 +204,10 @@ export default function Calender() {
     };
     return selected;
   };
+  const openPopup = (date) => {
+    console.log({ date });
+    dispatch(appActions.setCalenderPopup(date))
+  };
   return (
     <div className="calender">
       <div className="box flex h-screen w-screen">
@@ -219,7 +242,10 @@ export default function Calender() {
                   (dayObj.selected ? " border-yellow-400 " : "") +
                   " relative btn flex justify-center items-center h-[12%] w-[18%] hover:shadow-md border rounded border-white/0 hover:border-yellow-400/80 transition duration-100 cursor-pointer"
                 }
-                onClick={() => hDayChange(i + 1)}
+                onClick={() => {
+                  hDayChange(i + 1);
+                  openPopup(dayObj.date);
+                }}
               >
                 {i + 1}
                 {dayObj.hasData ? (
