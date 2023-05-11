@@ -2,9 +2,11 @@ import { useSelector } from "react-redux";
 import { dispatch } from "../store";
 import { appActions } from "../services/appReducer";
 import { motion } from "framer-motion";
-import { useRef, useState } from "react";
-
+import { useEffect, useRef, useState } from "react";
+import Api from "../Api";
+let sync = false;
 export default function CalenderPopup() {
+  const uid = useSelector((state) => state.app.uid);
   const calenderPopup = useSelector((state) => state.app.calenderPopup);
   const data = useSelector((state) => state.app.data);
   const [text, setText] = useState("");
@@ -12,22 +14,25 @@ export default function CalenderPopup() {
   const [editIndex, setEditIndex] = useState(null);
   const editInput = useRef(null);
   //   return <div>CalenderPopup {calenderPopup}</div>;
-  console.log({ calenderPopup });
+
+//   console.log({ calenderPopup });
   const closePopup = () => {
     dispatch(appActions.setCalenderPopup(""));
   };
   const hSubmit = (e) => {
-    closeEdit()
+    closeEdit();
     e.preventDefault();
     // console.log(e, e.target.todo.value);
     if (text) {
       dispatch(appActions.updateTodos({ text }));
       setText("");
+      sync = true;
     }
   };
   const hDelete = (index) => {
-    closeEdit()
+    closeEdit();
     dispatch(appActions.deleteTodo({ index }));
+    sync = true;
   };
   const hEditChange = (e) => {
     setEditText(e.target.value);
@@ -36,6 +41,7 @@ export default function CalenderPopup() {
     if (e.code == "Enter") {
       dispatch(appActions.editTodo({ editIndex, editText }));
       closeEdit();
+      sync = true;
     }
   };
   const closeEdit = () => {
@@ -45,8 +51,22 @@ export default function CalenderPopup() {
   const setEditInput = (i, text) => {
     setEditIndex(i);
     setEditText(text);
-    setTimeout(()=>editInput.current.focus(), 10);
+    setTimeout(() => editInput.current.focus(), 10);
   };
+  const syncChanges = () => {
+    Api.post("/updateData/", { uid, data }).then(({ data: d }) => {
+      console.log("data synced", d);
+      // setData(d.data);
+      //   dispatch(appActions.setData(d.data));
+    });
+  };
+  useEffect(() => {
+    if (sync) {
+      syncChanges();
+      sync = false;
+    }
+  }, [data]);
+
   return (
     <motion.div
       class="relative z-10"
@@ -70,23 +90,23 @@ export default function CalenderPopup() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.05 }}
                 exit={{ opacity: 0 }}
-                class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg"
+                class="relative transform overflow-hidden rounded-lg bg-[#181a1b] text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg"
               >
-                <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                <div class="bg-[#181a1b] px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                   <div class="flex items-start">
                     <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
                       ✏️
                     </div>
                     <div class="mt-3 text-center ml-4 mt-0 text-left flex-1">
                       <h3
-                        class="text-base font-semibold leading-6 text-gray-900 flex justify-between items-center "
+                        class="text-base font-semibold leading-6 text-white flex justify-between items-center "
                         id="modal-title"
                       >
                         Todo's for {calenderPopup}{" "}
                         <button
                           onClick={closePopup}
                           type="button"
-                          class="mt-3 inline-flex justify-center  rounded-full bg-white px-2 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                          class="mt-3 inline-flex justify-center  rounded-full bg-[#181a1b] px-2 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50/25 sm:mt-0 sm:w-auto"
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -94,7 +114,7 @@ export default function CalenderPopup() {
                             viewBox="0 0 24 24"
                             strokeWidth={1.5}
                             stroke="currentColor"
-                            className="w-6 h-6 text-gray-500"
+                            className="w-6 h-6 text-white"
                           >
                             <path
                               strokeLinecap="round"
@@ -108,8 +128,8 @@ export default function CalenderPopup() {
                       <div class="mt-2">
                         <ul className="list-disc pl-5 pt-3">
                           {data[calenderPopup]?.map((text, i) => (
-                            <li key={i} className="text-md text-gray-700 pb-1">
-                              <div className="flex justify-between pr-3">
+                            <li key={i} className="text-md text-white pb-1">
+                              <div className="flex justify-between pr-2">
                                 {editIndex == i ? (
                                   <input
                                     ref={editInput}
@@ -117,7 +137,7 @@ export default function CalenderPopup() {
                                     value={editText}
                                     onChange={hEditChange}
                                     onKeyDown={hEditSubmit}
-                                    className="w-full text-left bg-transparent text-gray-700 outline-none border-b "
+                                    className="w-full text-left bg-transparent text-white outline-none border-b "
                                   ></input>
                                 ) : (
                                   <span
@@ -155,14 +175,14 @@ export default function CalenderPopup() {
                   </div>
                 </div>
                 <form
-                  class="bg-gray-50 px-4 pt-1 pb-5 flex flex-row sm:px-6 sm:ml-14"
+                  class=" px-4 pt-1 pb-5 flex flex-row sm:px-6 sm:ml-14"
                   onSubmit={hSubmit}
                 >
                   <input
                     name="todo"
                     value={text}
                     onChange={(e) => setText(e.target.value)}
-                    className="flex-1 px-3 w-full rounded-l-md bg-transparent border-orange-500 border border-r-0 outline-none text-gray-700"
+                    className="flex-1 px-3 w-full rounded-l-md bg-transparent border-orange-500 border border-r-0 outline-none text-white"
                   ></input>
                   <button
                     type="submit"

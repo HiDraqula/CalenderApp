@@ -35,6 +35,7 @@ export default function Calender() {
   useEffect(() => {
     if (uid) {
       fetchData();
+      initiate();
     }
   }, [uid]);
   useEffect(() => {
@@ -48,7 +49,7 @@ export default function Calender() {
     Api.post("/getData/" + uid).then(({ data: d }) => {
       console.log(d);
       // setData(d.data);
-      dispatch(appActions.setData(d.data))
+      dispatch(appActions.setData(d.data||{}))
     });
   };
   const initiate = () => {
