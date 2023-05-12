@@ -97,7 +97,7 @@ export default function CalenderPopup() {
                     <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
                       ✏️
                     </div>
-                    <div class="mt-3 text-center ml-4 mt-0 text-left flex-1">
+                    <div class=" text-center ml-4 mt-0 text-left flex-1">
                       <h3
                         class="text-base font-semibold leading-6 text-white flex justify-between items-center "
                         id="modal-title"
